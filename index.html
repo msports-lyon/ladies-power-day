@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ladies Power Day — M Sports</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap');
+
+    :root {
+      --rose:    #E8587A;
+      --rose-light: #FDEDF1;
+      --rose-dark:  #C23D62;
+      --sage:    #7DB87A;
+      --cream:   #FDF8F5;
+      --charcoal:#2B2B2B;
+      --muted:   #7A7A7A;
+      --border:  #E8DEDD;
+      --error:   #D93025;
+      --success: #2E7D32;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--cream);
+      font-family: 'Inter', sans-serif;
+      color: var(--charcoal);
+      min-height: 100vh;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #E8587A 0%, #C23D62 60%, #8B2252 100%);
+      color: white;
+      text-align: center;
+      padding: 52px 24px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '♀';
+      position: absolute;
+      font-size: 260px;
+      opacity: .06;
+      top: -40px; right: -30px;
+      line-height: 1;
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.35);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 6vw, 3.2rem);
+      line-height: 1.15;
+      margin-bottom: 10px;
+    }
+    .hero h1 span { color: #FFD6E0; }
+    .hero p {
+      font-size: .95rem;
+      opacity: .88;
+      max-width: 420px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ── CARD ── */
+    .card {
+      max-width: 560px;
+      margin: -28px auto 48px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.10);
+      padding: 36px 32px 40px;
+    }
+
+    .section-label {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--rose);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .field { margin-bottom: 18px; }
+    label {
+      display: block;
+      font-size: .82rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--charcoal);
+    }
+    label .req { color: var(--rose); margin-left: 2px; }
+
+    input[type=text], input[type=email], input[type=tel],
+    select {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: .9rem;
+      color: var(--charcoal);
+      background: white;
+      transition: border-color .2s, box-shadow .2s;
+      appearance: none;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--rose);
+      box-shadow: 0 0 0 3px rgba(232,88,122,.12);
+    }
+    input.error, select.error {
+      border-color: var(--error);
+      box-shadow: 0 0 0 3px rgba(217,48,37,.1);
+    }
+    .field-error {
+      font-size: .75rem;
+      color: var(--error);
+      margin-top: 4px;
+      display: none;
+    }
+    .field-error.show { display: block; }
+
+    /* city autocomplete */
+    .autocomplete-wrap { position: relative; }
+    #city-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0; right: 0;
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 6px 20px rgba(0,0,0,.1);
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 100;
+      display: none;
+    }
+    #city-dropdown li {
+      list-style: none;
+      padding: 10px 14px;
+      font-size: .88rem;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    #city-dropdown li:hover, #city-dropdown li.active {
+      background: var(--rose-light);
+      color: var(--rose-dark);
+    }
+
+    /* radio / checkbox groups */
+    .radio-group, .check-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .radio-group label, .check-group label {
+      font-weight: 400;
+      font-size: .88rem;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      background: var(--cream);
+      border: 1.5px solid var(--border);
+      border-radius: 30px;
+      padding: 8px 16px;
+      transition: border-color .2s, background .2s;
+      user-select: none;
+    }
+    .radio-group input[type=radio],
+    .check-group input[type=checkbox] {
+      width: 16px; height: 16px;
+      accent-color: var(--rose);
+      cursor: pointer;
+    }
+    .radio-group label:has(input:checked),
+    .check-group label:has(input:checked) {
+      border-color: var(--rose);
+      background: var(--rose-light);
+      color: var(--rose-dark);
+      font-weight: 600;
+    }
+
+    /* children number */
+    #children-count-wrap {
+      display: none;
+      margin-top: 12px;
+    }
+    #children-count-wrap.show { display: block; }
+
+    .divider { height: 1px; background: var(--border); margin: 26px 0; }
+
+    /* submit */
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--rose), var(--rose-dark));
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: .02em;
+      transition: opacity .2s, transform .1s;
+      margin-top: 8px;
+    }
+    .btn-submit:hover { opacity: .92; }
+    .btn-submit:active { transform: scale(.99); }
+    .btn-submit:disabled { opacity: .6; cursor: not-allowed; }
+
+    /* success */
+    .success-screen {
+      display: none;
+      text-align: center;
+      padding: 20px 0 10px;
+    }
+    .success-screen .icon {
+      font-size: 3.5rem;
+      margin-bottom: 16px;
+    }
+    .success-screen h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      color: var(--rose-dark);
+      margin-bottom: 8px;
+    }
+    .success-screen p { color: var(--muted); font-size: .9rem; line-height: 1.6; }
+
+    /* toast */
+    #toast {
+      position: fixed;
+      bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--charcoal);
+      color: white;
+      padding: 12px 22px;
+      border-radius: 30px;
+      font-size: .88rem;
+      font-weight: 500;
+      opacity: 0;
+      transition: transform .3s, opacity .3s;
+      z-index: 999;
+      white-space: nowrap;
+    }
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    #toast.success { background: var(--success); }
+    #toast.error-toast { background: var(--error); }
+
+    @media (max-width: 600px) {
+      .card { margin: -20px 12px 32px; padding: 28px 20px 32px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">M Sports × Ladies Power Day</div>
+  <h1>Bienvenue <span>entre femmes 💪</span></h1>
+  <p>Jeux, buffet healthy & bonne humeur. Remplis le formulaire ci-dessous pour qu'on te compte parmi nous !</p>
+</div>
+
+<div class="card">
+
+  <!-- SUCCESS -->
+  <div class="success-screen" id="success-screen">
+    <div class="icon">🎉</div>
+    <h2>Tu es enregistrée !</h2>
+    <p>Merci d'être là. On a bien noté ta présence.<br>Profite de ta journée 💕</p>
+  </div>
+
+  <!-- FORM -->
+  <form id="reg-form" novalidate>
+
+    <!-- Infos perso -->
+    <div class="section-label">Tes infos</div>
+
+    <div class="field">
+      <label for="fullname">Prénom & Nom <span class="req">*</span></label>
+      <input type="text" id="fullname" placeholder="Ex : Fatima Benali" autocomplete="name"/>
+      <div class="field-error" id="err-fullname">Merci d'entrer ton prénom et ton nom.</div>
+    </div>
+
+    <div class="field">
+      <label for="email">Email <span class="req">*</span></label>
+      <input type="email" id="email" placeholder="ton@email.com" autocomplete="email"/>
+      <div class="field-error" id="err-email">Email invalide. Vérifie le format (ex : nom@domaine.fr)</div>
+    </div>
+
+    <div class="field">
+      <label for="phone">Numéro de téléphone <span class="req">*</span></label>
+      <input type="tel" id="phone" placeholder="06 12 34 56 78" autocomplete="tel"/>
+      <div class="field-error" id="err-phone">Numéro invalide. 10 chiffres attendus (ex : 0612345678)</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Profil -->
+    <div class="section-label">Ton profil</div>
+
+    <div class="field">
+      <label>Tranche d'âge <span class="req">*</span></label>
+      <div class="radio-group" id="age-group">
+        <label><input type="radio" name="age_range" value="16-24"/> 16 – 24 ans</label>
+        <label><input type="radio" name="age_range" value="25-34"/> 25 – 34 ans</label>
+        <label><input type="radio" name="age_range" value="35-44"/> 35 – 44 ans</label>
+        <label><input type="radio" name="age_range" value="45-54"/> 45 – 54 ans</label>
+        <label><input type="radio" name="age_range" value="55+"/> 55 ans et +</label>
+      </div>
+      <div class="field-error" id="err-age">Sélectionne ta tranche d'âge.</div>
+    </div>
+
+    <div class="field">
+      <label for="city">Ville <span class="req">*</span></label>
+      <div class="autocomplete-wrap">
+        <input type="text" id="city" placeholder="Commence à taper ta ville..." autocomplete="off"/>
+        <ul id="city-dropdown"></ul>
+      </div>
+      <div class="field-error" id="err-city">Sélectionne une ville dans la liste.</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Événement -->
+    <div class="section-label">L'événement</div>
+
+    <div class="field">
+      <label>Comment tu as connu l'événement ? <span class="req">*</span></label>
+      <div class="radio-group" id="known-group">
+        <label><input type="radio" name="known_from" value="instagram"/> Instagram</label>
+        <label><input type="radio" name="known_from" value="facebook"/> Facebook</label>
+        <label><input type="radio" name="known_from" value="bouche_a_oreille"/> Bouche à oreille</label>
+        <label><input type="radio" name="known_from" value="staff"/> Staff de la salle</label>
+      </div>
+      <div class="field-error" id="err-known">Sélectionne une option.</div>
+    </div>
+
+    <div class="field">
+      <label>Tu es déjà membre de M Sports ? <span class="req">*</span></label>
+      <div class="radio-group" id="member-group">
+        <label><input type="radio" name="already_member" value="oui"/> Oui, je suis membre</label>
+        <label><input type="radio" name="already_member" value="non"/> Non, je viens en externe</label>
+      </div>
+      <div class="field-error" id="err-member">Sélectionne une option.</div>
+    </div>
+
+    <div class="field">
+      <label>Tu as amené des enfants (- de 16 ans) ? <span class="req">*</span></label>
+      <div class="radio-group" id="children-group">
+        <label><input type="radio" name="with_children" value="non" id="children-no"/> Non</label>
+        <label><input type="radio" name="with_children" value="oui" id="children-yes"/> Oui</label>
+      </div>
+      <div class="field-error" id="err-children">Sélectionne une option.</div>
+
+      <div id="children-count-wrap">
+        <label for="children-count" style="margin-top:4px;">Combien d'enfants ?</label>
+        <select id="children-count">
+          <option value="">-- Sélectionne --</option>
+          <option value="1">1 enfant</option>
+          <option value="2">2 enfants</option>
+          <option value="3">3 enfants</option>
+          <option value="4">4 enfants</option>
+          <option value="5+">5 enfants ou plus</option>
+        </select>
+        <div class="field-error" id="err-children-count">Indique le nombre d'enfants.</div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn-submit" id="submit-btn">
+      ✨ Je m'enregistre
+    </button>
+
+  </form>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  // ── CONFIG SUPABASE ──
+  const SUPABASE_URL  = 'https://pycgrljfbnfnhwrpknbh.supabase.co';
+  const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5Y2dybGpmYm5mbmh3cnBrbmJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMTcyNjUsImV4cCI6MjA5NzY5MzI2NX0.N5pvjYWWPaCR8XmNUOr8BkV4dT3jIv0mIr0g0mRM3UE';
+  const TABLE = 'women_event';
+
+  // ── CITY AUTOCOMPLETE (API Géo gouvernement) ──
+  const cityInput    = document.getElementById('city');
+  const cityDropdown = document.getElementById('city-dropdown');
+  let citySelected   = false;
+  let cityDebounce;
+
+  cityInput.addEventListener('input', () => {
+    citySelected = false;
+    clearTimeout(cityDebounce);
+    const q = cityInput.value.trim();
+    if (q.length < 2) { cityDropdown.style.display = 'none'; return; }
+    cityDebounce = setTimeout(() => fetchCities(q), 280);
+  });
+
+  async function fetchCities(q) {
+    try {
+      const res  = await fetch(`https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(q)}&fields=nom,codesPostaux&boost=population&limit=7`);
+      const data = await res.json();
+      renderCities(data);
+    } catch { cityDropdown.style.display = 'none'; }
+  }
+
+  function renderCities(cities) {
+    if (!cities.length) { cityDropdown.style.display = 'none'; return; }
+    cityDropdown.innerHTML = '';
+    cities.forEach(c => {
+      const cp = c.codesPostaux?.[0] ?? '';
+      const li = document.createElement('li');
+      li.textContent = `${c.nom} (${cp})`;
+      li.dataset.value = `${c.nom} (${cp})`;
+      li.addEventListener('mousedown', e => {
+        e.preventDefault();
+        cityInput.value = li.dataset.value;
+        citySelected = true;
+        cityDropdown.style.display = 'none';
+        clearError('city');
+      });
+      cityDropdown.appendChild(li);
+    });
+    cityDropdown.style.display = 'block';
+  }
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.autocomplete-wrap')) cityDropdown.style.display = 'none';
+  });
+
+  cityInput.addEventListener('blur', () => {
+    setTimeout(() => { cityDropdown.style.display = 'none'; }, 150);
+  });
+
+  // ── CHILDREN TOGGLE ──
+  document.querySelectorAll('input[name="with_children"]').forEach(r => {
+    r.addEventListener('change', () => {
+      const wrap = document.getElementById('children-count-wrap');
+      if (r.value === 'oui') wrap.classList.add('show');
+      else { wrap.classList.remove('show'); document.getElementById('children-count').value = ''; }
+    });
+  });
+
+  // ── VALIDATION HELPERS ──
+  function showError(id, msg) {
+    const el = document.getElementById('err-' + id);
+    if (msg) el.textContent = msg;
+    el.classList.add('show');
+    const input = document.getElementById(id);
+    if (input) input.classList.add('error');
+  }
+  function clearError(id) {
+    document.getElementById('err-' + id)?.classList.remove('show');
+    document.getElementById(id)?.classList.remove('error');
+  }
+
+  function validateEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); }
+  function validatePhone(v) {
+    const cleaned = v.replace(/[\s.\-()]/g, '');
+    return /^(\+33|0033|0)[1-9][0-9]{8}$/.test(cleaned);
+  }
+  function normalizePhone(v) {
+    let c = v.replace(/[\s.\-()]/g, '');
+    if (c.startsWith('+33')) c = '0' + c.slice(3);
+    if (c.startsWith('0033')) c = '0' + c.slice(4);
+    return c;
+  }
+
+  // ── TOAST ──
+  function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'show ' + (type === 'success' ? 'success' : type === 'error' ? 'error-toast' : '');
+    setTimeout(() => { t.className = ''; }, 3500);
+  }
+
+  // ── SUBMIT ──
+  document.getElementById('reg-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    let valid = true;
+
+    // Nom
+    const fullname = document.getElementById('fullname').value.trim();
+    clearError('fullname');
+    if (fullname.length < 3 || !/\s/.test(fullname)) { showError('fullname'); valid = false; }
+
+    // Email
+    const email = document.getElementById('email').value.trim().toLowerCase();
+    clearError('email');
+    if (!validateEmail(email)) { showError('email'); valid = false; }
+
+    // Téléphone
+    const phoneRaw = document.getElementById('phone').value.trim();
+    clearError('phone');
+    if (!validatePhone(phoneRaw)) { showError('phone'); valid = false; }
+
+    // Âge
+    const age_range = document.querySelector('input[name="age_range"]:checked')?.value;
+    clearError('age');
+    if (!age_range) { showError('age'); valid = false; }
+
+    // Ville
+    clearError('city');
+    if (!citySelected || !cityInput.value.trim()) {
+      showError('city', 'Sélectionne une ville dans la liste proposée.');
+      valid = false;
+    }
+
+    // Connu via
+    const known_from = document.querySelector('input[name="known_from"]:checked')?.value;
+    clearError('known');
+    if (!known_from) { showError('known'); valid = false; }
+
+    // Membre
+    const already_member = document.querySelector('input[name="already_member"]:checked')?.value;
+    clearError('member');
+    if (!already_member) { showError('member'); valid = false; }
+
+    // Enfants
+    const with_children_raw = document.querySelector('input[name="with_children"]:checked')?.value;
+    clearError('children');
+    if (!with_children_raw) { showError('children'); valid = false; }
+
+    let children_count = null;
+    if (with_children_raw === 'oui') {
+      children_count = document.getElementById('children-count').value;
+      clearError('children-count');
+      if (!children_count) { showError('children-count'); valid = false; }
+    }
+
+    if (!valid) {
+      showToast('Vérifie les champs en rouge avant de continuer.', 'error');
+      return;
+    }
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Enregistrement…';
+
+    const payload = {
+      fullname,
+      email,
+      phone: normalizePhone(phoneRaw),
+      age_range,
+      city: cityInput.value.trim(),
+      known_from,
+      already_member: already_member === 'oui',
+      with_children: with_children_raw === 'oui',
+      children_count: children_count || null
+    };
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        // Doublon email/téléphone
+        if (err?.code === '23505') {
+          showToast('Tu es déjà enregistrée avec cet email ou ce numéro 😊', 'error');
+        } else {
+          throw new Error(err?.message || 'Erreur serveur');
+        }
+        btn.disabled = false;
+        btn.textContent = '✨ Je m\'enregistre';
+        return;
+      }
+
+      document.getElementById('reg-form').style.display = 'none';
+      document.getElementById('success-screen').style.display = 'block';
+      showToast('Enregistrement réussi 🎉', 'success');
+
+    } catch (err) {
+      console.error(err);
+      showToast('Une erreur est survenue. Réessaie.', 'error');
+      btn.disabled = false;
+      btn.textContent = '✨ Je m\'enregistre';
+    }
+  });
+</script>
+</body>
+</html>
