@@ -233,6 +233,43 @@
     }
     #children-count-wrap.show { display: block; }
 
+    /* child detail blocks */
+    .child-block {
+      margin-top: 14px;
+      padding: 14px 16px;
+      background: var(--rose-light);
+      border-radius: 12px;
+      border: 1px solid rgba(217,79,130,.2);
+    }
+    .child-block-title {
+      font-size: .75rem;
+      font-weight: 700;
+      color: var(--rose-dark);
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .child-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 80px;
+      gap: 10px;
+    }
+    @media(max-width: 480px) { .child-row { grid-template-columns: 1fr; } }
+    .child-row input {
+      padding: 9px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      font-family: 'Inter', sans-serif;
+      font-size: .85rem;
+      color: var(--charcoal);
+      background: white;
+      outline: none;
+      transition: border-color .2s;
+      width: 100%;
+    }
+    .child-row input:focus { border-color: var(--violet); }
+    .child-row input::placeholder { color: #bbb; }
+
     .divider { height: 1px; background: var(--border); margin: 26px 0; }
 
     /* submit */
@@ -488,9 +525,31 @@
     r.addEventListener('change', () => {
       const wrap = document.getElementById('children-count-wrap');
       if (r.value === 'oui') wrap.classList.add('show');
-      else { wrap.classList.remove('show'); document.getElementById('children-count').value = ''; }
+      else {
+        wrap.classList.remove('show');
+        document.getElementById('children-count').value = '';
+        document.getElementById('children-fields').innerHTML = '';
+      }
     });
   });
+
+  function genChildFields() {
+    const n = parseInt(document.getElementById('children-count').value) || 0;
+    const container = document.getElementById('children-fields');
+    container.innerHTML = '';
+    for (let i = 1; i <= n; i++) {
+      const block = document.createElement('div');
+      block.className = 'child-block';
+      block.innerHTML = `
+        <div class="child-block-title">Enfant ${i}</div>
+        <div class="child-row">
+          <input type="text" id="child-prenom-${i}" placeholder="Prénom" autocomplete="off"/>
+          <input type="text" id="child-nom-${i}" placeholder="Nom" autocomplete="off"/>
+          <input type="number" id="child-age-${i}" placeholder="Âge" min="0" max="15"/>
+        </div>`;
+      container.appendChild(block);
+    }
+  }
 
   function showError(id, msg) {
     const el = document.getElementById('err-' + id);
@@ -577,6 +636,20 @@
     btn.disabled = true;
     btn.textContent = 'Enregistrement…';
 
+    // Collect children details
+    let children_details = null;
+    if (with_children_raw === 'oui' && children_count) {
+      const n = parseInt(children_count);
+      children_details = [];
+      for (let i = 1; i <= n; i++) {
+        children_details.push({
+          prenom: (document.getElementById(`child-prenom-${i}`)?.value || '').trim(),
+          nom:    (document.getElementById(`child-nom-${i}`)?.value    || '').trim(),
+          age:    (document.getElementById(`child-age-${i}`)?.value    || '').trim()
+        });
+      }
+    }
+
     const payload = {
       fullname,
       email,
@@ -586,7 +659,8 @@
       known_from,
       already_member,
       with_children: with_children_raw === 'oui',
-      children_count: children_count || null
+      children_count: children_count || null,
+      children_details: children_details
     };
 
     try {
