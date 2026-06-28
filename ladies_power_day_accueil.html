@@ -607,14 +607,12 @@ function renderTable() {
       <td>${esc(v.city||'-')}</td>
       <td style="font-size:.8rem">${labelKnown(v.known_from)}</td>
       <td><span class="pill ${memberPill(v.already_member)}">${labelMember(v.already_member)}</span></td>
-      <td style="text-align:center">
-        \${v.with_children
-          ? \`<button class="btn-children btn-sm" onclick='showChildren(\${JSON.stringify(v.children_details||[])}, "\${esc(v.fullname||"")}")'>👧 \${v.children_count||'?'}</button>\`
-          : '–'}
+      <td style="text-align:center" id="cell-child-${v.id}">
+        ${v.with_children ? '<button class="btn-children btn-sm" onclick="showChildren(\'${v.id}\')">&#128103; ${v.children_count||"?"}</button>' : '–'}
       </td>
       <td>
         <div class="actions">
-          <button class="btn-danger btn-sm" onclick="askDel('\${v.id}')">✕</button>
+          <button class="btn-danger btn-sm" onclick="askDel('${v.id}')">✕</button>
         </div>
       </td>
     </tr>
@@ -688,7 +686,11 @@ function csv() {
   a.download='ladies_power_day_inscrites.csv'; a.click();
 }
 
-function showChildren(details, name) {
+function showChildren(id) {
+  const v = visitors.find(x => x.id === id);
+  if (!v) return;
+  const details = v.children_details || [];
+  const name = v.fullname || '';
   const modal = document.getElementById('children-modal');
   document.getElementById('children-modal-title').textContent = 'Enfants de ' + name;
   const body = document.getElementById('children-modal-body');
