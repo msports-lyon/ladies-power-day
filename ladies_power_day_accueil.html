@@ -598,25 +598,22 @@ function renderTable() {
     tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--muted)">Aucune inscrite trouvée.</td></tr>`;
     return;
   }
-  tbody.innerHTML = rows.map(v => `
-    <tr>
-      <td style="font-weight:600">${esc(v.fullname||'')}</td>
-      <td style="font-size:.8rem;color:var(--muted)">${esc(v.email||'-')}</td>
-      <td style="font-size:.8rem;color:var(--muted)">${esc(v.phone||'-')}</td>
-      <td>${v.age_range||'-'}</td>
-      <td>${esc(v.city||'-')}</td>
-      <td style="font-size:.8rem">${labelKnown(v.known_from)}</td>
-      <td><span class="pill ${memberPill(v.already_member)}">${labelMember(v.already_member)}</span></td>
-      <td style="text-align:center" id="cell-child-${v.id}">
-        ${v.with_children ? '<button class="btn-children btn-sm" onclick="showChildren(\'${v.id}\')">&#128103; ${v.children_count||"?"}</button>' : '–'}
-      </td>
-      <td>
-        <div class="actions">
-          <button class="btn-danger btn-sm" onclick="askDel('${v.id}')">✕</button>
-        </div>
-      </td>
-    </tr>
-  `).join('');
+  tbody.innerHTML = rows.map(v => {
+    const enfantsBtn = v.with_children
+      ? '<button class="btn-children btn-sm" onclick="showChildren(\''+v.id+'\')">&#128103; '+(v.children_count||'?')+'</button>'
+      : '–';
+    return '<tr>' +
+      '<td style="font-weight:600">'+esc(v.fullname||'')+'</td>' +
+      '<td style="font-size:.8rem;color:var(--muted)">'+esc(v.email||'-')+'</td>' +
+      '<td style="font-size:.8rem;color:var(--muted)">'+esc(v.phone||'-')+'</td>' +
+      '<td>'+(v.age_range||'-')+'</td>' +
+      '<td>'+esc(v.city||'-')+'</td>' +
+      '<td style="font-size:.8rem">'+labelKnown(v.known_from)+'</td>' +
+      '<td><span class="pill '+memberPill(v.already_member)+'">'+labelMember(v.already_member)+'</span></td>' +
+      '<td style="text-align:center">'+enfantsBtn+'</td>' +
+      '<td><div class="actions"><button class="btn-danger btn-sm" onclick="askDel(\''+v.id+'\')">✕</button></div></td>' +
+      '</tr>';
+  }).join('');
 }
 
 function labelKnown(k) {
