@@ -272,6 +272,14 @@ tbody td { padding: 11px 14px; vertical-align: middle; }
 }
 .btn-danger:hover { opacity: .82; }
 .btn-sm { padding: 6px 12px; font-size: .78rem; }
+.btn-children {
+  background: var(--rose-light); color: var(--rose-dark);
+  border: 1.5px solid rgba(217,79,130,.3); border-radius: 7px;
+  padding: 5px 10px; font-family: 'Inter', sans-serif;
+  font-size: .78rem; font-weight: 600; cursor: pointer;
+  transition: background .2s;
+}
+.btn-children:hover { background: #f0c0d8; }
 
 /* Toggle */
 .toggle-wrap { display: flex; align-items: center; gap: 8px; }
@@ -417,6 +425,17 @@ tbody td { padding: 11px 14px; vertical-align: middle; }
         </thead>
         <tbody id="tbody"></tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal enfants -->
+<div class="modal-bg" id="children-modal" style="display:none">
+  <div class="modal" style="max-width:480px">
+    <h3 id="children-modal-title">Détails enfants</h3>
+    <div id="children-modal-body" style="margin-bottom:20px"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="document.getElementById('children-modal').style.display='none'">Fermer</button>
     </div>
   </div>
 </div>
@@ -588,10 +607,14 @@ function renderTable() {
       <td>${esc(v.city||'-')}</td>
       <td style="font-size:.8rem">${labelKnown(v.known_from)}</td>
       <td><span class="pill ${memberPill(v.already_member)}">${labelMember(v.already_member)}</span></td>
-      <td style="text-align:center">${v.with_children ? '👧 '+(v.children_count||'?') : '–'}</td>
+      <td style="text-align:center">
+        \${v.with_children
+          ? \`<button class="btn-children btn-sm" onclick='showChildren(\${JSON.stringify(v.children_details||[])}, "\${esc(v.fullname||"")}")'>👧 \${v.children_count||'?'}</button>\`
+          : '–'}
+      </td>
       <td>
         <div class="actions">
-          <button class="btn-danger btn-sm" onclick="askDel('${v.id}')">✕</button>
+          <button class="btn-danger btn-sm" onclick="askDel('\${v.id}')">✕</button>
         </div>
       </td>
     </tr>
@@ -646,11 +669,43 @@ function toast(msg, type='') {
 /* ── CSV ── */
 function csv() {
   if(!visitors.length) return toast('Aucune donnée.','error-t');
-  const cols = ['fullname','email','phone','age_range','city','known_from','already_member','with_children','children_count','converti','created_at'];
-  const rows = [cols.join(';'), ...visitors.map(v=>cols.map(c=>JSON.stringify(v[c]??'')).join(';'))];
+  const cols = ['fullname','email','phone','age_range','city','known_from','already_member','with_children','children_count','created_at'];
+  const rows = [
+    [...cols, 'enfant1_prenom','enfant1_nom','enfant1_age','enfant2_prenom','enfant2_nom','enfant2_age','enfant3_prenom','enfant3_nom','enfant3_age','enfant4_prenom','enfant4_nom','enfant4_age','enfant5_prenom','enfant5_nom','enfant5_age'].join(';'),
+    ...visitors.map(v => {
+      const base = cols.map(c => JSON.stringify(v[c]??'')).join(';');
+      const kids = [];
+      const details = v.children_details || [];
+      for (let i = 0; i < 5; i++) {
+        const c = details[i] || {};
+        kids.push(JSON.stringify(c.prenom||''), JSON.stringify(c.nom||''), JSON.stringify(c.age||''));
+      }
+      return base + ';' + kids.join(';');
+    })
+  ];
   const blob = new Blob([rows.join('\n')], {type:'text/csv;charset=utf-8;'});
   const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
   a.download='ladies_power_day_inscrites.csv'; a.click();
+}
+
+function showChildren(details, name) {
+  const modal = document.getElementById('children-modal');
+  document.getElementById('children-modal-title').textContent = 'Enfants de ' + name;
+  const body = document.getElementById('children-modal-body');
+  if (!details || !details.length) {
+    body.innerHTML = '<p style="color:var(--muted);font-size:.88rem">Aucun détail renseigné.</p>';
+  } else {
+    body.innerHTML = details.map((c, i) => `
+      <div style="padding:12px 14px;background:var(--rose-light);border-radius:10px;margin-bottom:10px;border:1px solid rgba(217,79,130,.2)">
+        <div style="font-size:.7rem;font-weight:700;color:var(--rose-dark);letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px">Enfant ${i+1}</div>
+        <div style="font-size:.88rem;display:grid;grid-template-columns:1fr 1fr 60px;gap:8px">
+          <div><span style="color:var(--muted);font-size:.72rem">Prénom</span><br><strong>${esc(c.prenom||'–')}</strong></div>
+          <div><span style="color:var(--muted);font-size:.72rem">Nom</span><br><strong>${esc(c.nom||'–')}</strong></div>
+          <div><span style="color:var(--muted);font-size:.72rem">Âge</span><br><strong>${esc(c.age||'–')}</strong></div>
+        </div>
+      </div>`).join('');
+  }
+  modal.style.display = 'flex';
 }
 
 function esc(s) { return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
